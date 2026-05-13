@@ -48,7 +48,7 @@ async function start() {
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
     console.error(
-      '   Start MongoDB locally (e.g. mongod) or set MONGODB_URI to MongoDB Atlas in server/.env'
+      '   Local: run MongoDB (mongod) or set MONGODB_URI in server/.env. Railway: set MONGODB_URI in Variables (Atlas mongodb+srv://...).'
     );
     process.exit(1);
   }
