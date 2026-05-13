@@ -5,7 +5,14 @@ import {
   sendLeadCustomerConfirmation,
 } from '../services/leadNotificationMail.js';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+/** Lazy client so missing OPENAI_API_KEY does not crash the process at import time (e.g. Railway without vars yet). */
+let openaiClient = null;
+function getOpenAI() {
+  const key = process.env.OPENAI_API_KEY?.trim();
+  if (!key) return null;
+  if (!openaiClient) openaiClient = new OpenAI({ apiKey: key });
+  return openaiClient;
+}
 
 const SYSTEM_PROMPT = `You are a friendly, knowledgeable assistant for Blue Rhino Roofing, a Houston and Katy TX roofing company.
 
@@ -92,6 +99,15 @@ export const chat = async (req, res) => {
       } catch (e) {
         console.error('Chatbot lead save error:', e.message);
       }
+    }
+
+    const openai = getOpenAI();
+    if (!openai) {
+      return res.json({
+        success: true,
+        reply:
+          "Thanks for reaching out to Blue Rhino Roofing! For immediate assistance, please call us at (346) 733-8558 or fill out our estimate form. Our team responds within 30 minutes during business hours.",
+      });
     }
 
     const completion = await openai.chat.completions.create({
